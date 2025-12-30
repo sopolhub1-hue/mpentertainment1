@@ -1,4 +1,4 @@
-name: Unzip Project
+name: Extract ZIP
 
 on:
   push:
@@ -16,12 +16,24 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Unzip
+      - name: Unzip ZIP(s)
         run: |
-          unzip -o *.zip
-          rm -f *.zip
+          set -e
+          for z in *.zip; do
+            [ -f "$z" ] || continue
+            unzip -o "$z"
+            rm -f "$z"
+          done
 
-      - name: Commit extracted files
+      - name: Flatten mpentertainment1 folder to repo root (if exists)
+        run: |
+          if [ -d "mpentertainment1" ]; then
+            shopt -s dotglob
+            mv mpentertainment1/* .
+            rm -rf mpentertainment1
+          fi
+
+      - name: Commit changes
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
